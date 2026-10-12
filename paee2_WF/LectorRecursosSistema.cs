@@ -193,7 +193,7 @@ namespace paee2_WF
                 if (cpuCounter != null)
                 {
                     float val = cpuCounter.NextValue();
-                    return string.Format("{0:0.00} %", val);
+                    return string.Format("{0:0.00}%", val);
                 }
             }
             catch
@@ -201,7 +201,7 @@ namespace paee2_WF
                 // Fallback
             }
 
-            return "0.00 %";
+            return "0.00%";
         }
 
         public double getDatosDisco(DiskData data)
@@ -270,8 +270,8 @@ namespace paee2_WF
                 {
                     if (drive.IsReady)
                     {
-                        string driveLetter = drive.Name.TrimEnd('\\', '/');
-                        drivesList.Add(string.Format("{0} {1}", driveLetter, FormatearBytes(drive.TotalFreeSpace)));
+                        string driveLetter = drive.Name.TrimEnd('\\', '/', ':');
+                        drivesList.Add(string.Format("{0}:{1}", driveLetter, FormatearBytes(drive.TotalFreeSpace)));
                     }
                 }
 
@@ -303,7 +303,7 @@ namespace paee2_WF
                     double usedGb = usedBytes / (1024.0 * 1024.0 * 1024.0);
                     double pct = (usedBytes / totalBytes) * 100.0;
 
-                    return string.Format("{0:0.00} % ({1:0.00} GB / {2:0.00} GB)", pct, usedGb, totalGb);
+                    return string.Format("{0:0.00}% ({1:0.00} GB / {2:0.00} GB)", pct, usedGb, totalGb);
                 }
             }
             catch
@@ -311,7 +311,7 @@ namespace paee2_WF
                 // Fallback
             }
 
-            return "0.00 % (0.00 GB / 0.00 GB)";
+            return "0.00% (0.00 GB / 0.00 GB)";
         }
 
         public string getMemoriaVirtual()
@@ -329,7 +329,7 @@ namespace paee2_WF
                     double usedGb = usedBytes / (1024.0 * 1024.0 * 1024.0);
                     double pct = totalBytes > 0 ? (usedBytes / totalBytes) * 100.0 : 0.0;
 
-                    return string.Format("{0:0.00} % ({1:0.00} GB / {2:0.00} GB)", pct, usedGb, totalGb);
+                    return string.Format("{0:0.00}% ({1:0.00} GB / {2:0.00} GB)", pct, usedGb, totalGb);
                 }
             }
             catch
@@ -337,7 +337,7 @@ namespace paee2_WF
                 // Fallback
             }
 
-            return "0.00 % (0.00 GB / 0.00 GB)";
+            return "0.00% (0.00 GB / 0.00 GB)";
         }
 
         public string getOrdenadorFabricante()

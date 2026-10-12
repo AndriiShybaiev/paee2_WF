@@ -1,82 +1,36 @@
 using System;
-using System.Drawing;
 using System.Windows.Forms;
 
 namespace paee2_WF
 {
     public partial class Form1 : Form
     {
-        private readonly LectorRecursosSistema lector;
+        private LectorRecursosSistema lectorRecursosSistema;
 
         public Form1()
         {
             InitializeComponent();
-            lector = new LectorRecursosSistema();
+            lectorRecursosSistema = new LectorRecursosSistema();
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            CargarInformacionEstatica();
             ActualizarDatos();
         }
 
-        private void CargarInformacionEstatica()
-        {
-            try
-            {
-                labelOrdenadorFabricante.Text = lector.getOrdenadorFabricante();
-                labelOrdenadorModelo.Text = lector.getOrdenadorModelo();
-                labelOrdenadorProcesador.Text = string.Join("; ", lector.getProcesadores());
-                labelUsuario.Text = lector.getUsuario();
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine("Error al cargar información estática: " + ex.Message);
-            }
-        }
-
-        public void ActualizarDatos()
-        {
-            try
-            {
-                // CPU
-                labelCPU.Text = lector.getCPU();
-
-                // Memoria
-                labelMemoriaFisica.Text = lector.getMemoriaFisica();
-                labelMemoriaVirtual.Text = lector.getMemoriaVirtual();
-
-                // Disco
-                labelDiscosLogicos.Text = lector.getDiscosLogicos();
-                labelDiscoLectura.Text = FormatearTasaBytes(lector.getDatosDisco(DiskData.Read));
-                labelDiscoEscritura.Text = FormatearTasaBytes(lector.getDatosDisco(DiskData.Write));
-                labelDiscoLecturaEscritura.Text = FormatearTasaBytes(lector.getDatosDisco(DiskData.ReadAndWrite));
-
-                // Red
-                labelRedRecibidos.Text = FormatearTasaBytes(lector.getDatosRed(NetData.Received));
-                labelRedEnviados.Text = FormatearTasaBytes(lector.getDatosRed(NetData.Sent));
-                labelRedRecibidosEnviados.Text = FormatearTasaBytes(lector.getDatosRed(NetData.ReceivedAndSent));
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine("Error al actualizar datos de recursos: " + ex.Message);
-            }
-        }
-
-        private void buttonIniciar_Click(object sender, EventArgs e)
+        private void btnActualizar_Click(object sender, EventArgs e)
         {
             if (timer1.Enabled)
             {
                 timer1.Stop();
-                buttonIniciar.Text = "Iniciar";
-                buttonIniciar.BackColor = Color.FromArgb(0, 122, 204);
+                btnActualizar.Text = "Iniciar";
             }
             else
             {
                 ActualizarDatos();
+                timer1.Interval = 1000;
                 timer1.Start();
-                buttonIniciar.Text = "Parar";
-                buttonIniciar.BackColor = Color.FromArgb(204, 51, 51);
+                btnActualizar.Text = "Parar";
             }
         }
 
@@ -85,15 +39,30 @@ namespace paee2_WF
             ActualizarDatos();
         }
 
-        private string FormatearTasaBytes(double bytesPerSec)
+        public void ActualizarDatos()
         {
-            if (bytesPerSec >= 1024.0 * 1024.0 * 1024.0)
-                return string.Format("{0:0.00} GB/s", bytesPerSec / (1024.0 * 1024.0 * 1024.0));
-            if (bytesPerSec >= 1024.0 * 1024.0)
-                return string.Format("{0:0.00} MB/s", bytesPerSec / (1024.0 * 1024.0));
-            if (bytesPerSec >= 1024.0)
-                return string.Format("{0:0.00} KB/s", bytesPerSec / 1024.0);
-            return string.Format("{0:0.00} B/s", bytesPerSec);
+            try
+            {
+                this.labelCPU.Text = lectorRecursosSistema.getCPU();
+                this.labelDiscoLectura.Text = lectorRecursosSistema.getDatosDisco(DiskData.Read).ToString();
+                this.labelDiscoEscritura.Text = lectorRecursosSistema.getDatosDisco(DiskData.Write).ToString();
+                this.labelDiscoLecturaEscritura.Text = lectorRecursosSistema.getDatosDisco(DiskData.ReadAndWrite).ToString();
+                this.labelRedRecibidos.Text = lectorRecursosSistema.getDatosRed(NetData.Received).ToString();
+                this.labelRedEnviados.Text = lectorRecursosSistema.getDatosRed(NetData.Sent).ToString();
+                this.labelRedRecibidosEnviados.Text = lectorRecursosSistema.getDatosRed(NetData.ReceivedAndSent).ToString();
+                this.labelDiscosLogicos.Text = lectorRecursosSistema.getDiscosLogicos();
+                this.labelMemoriaFisica.Text = lectorRecursosSistema.getMemoriaFisica();
+                this.labelMemoriaVirtual.Text = lectorRecursosSistema.getMemoriaVirtual();
+                this.labelOrdenadorFabricante.Text = lectorRecursosSistema.getOrdenadorFabricante();
+                this.labelOrdenadorModelo.Text = lectorRecursosSistema.getOrdenadorModelo();
+                string[] procesadores = lectorRecursosSistema.getProcesadores();
+                this.labelOrdenadorProcesador.Text = (procesadores != null && procesadores.Length > 0) ? procesadores[0] : "";
+                this.labelUsuario.Text = lectorRecursosSistema.getUsuario();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error al actualizar datos: " + ex.Message);
+            }
         }
     }
 }
