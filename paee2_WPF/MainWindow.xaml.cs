@@ -9,98 +9,91 @@ namespace paee2_WPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        private LectorRecursosSistema lector;
-        private DispatcherTimer dispatcherTimer;
+        private readonly LectorRecursosSistema _lector;
+        private readonly DispatcherTimer _dispatcherTimer;
+
+        private readonly PageCpuMemoria _pageCpuMemoria;
+        private readonly PageDiscoRed _pageDiscoRed;
+        private readonly PageSistema _pageSistema;
 
         public MainWindow()
         {
             InitializeComponent();
-            lector = new LectorRecursosSistema();
 
-            dispatcherTimer = new DispatcherTimer();
-            dispatcherTimer.Tick += new EventHandler(dispatcherTimer_Tick);
-            dispatcherTimer.Interval = TimeSpan.FromSeconds(1);
+            _lector = new LectorRecursosSistema();
+
+            _pageCpuMemoria = new PageCpuMemoria();
+            _pageDiscoRed = new PageDiscoRed();
+            _pageSistema = new PageSistema();
+
+            _dispatcherTimer = new DispatcherTimer();
+            _dispatcherTimer.Tick += dispatcherTimer_Tick;
+            _dispatcherTimer.Interval = TimeSpan.FromSeconds(1);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            CargarDatosEstaticos();
-            ActualizarDatos();
+            NavegarAPagina(_pageCpuMemoria);
         }
 
-        private void CargarDatosEstaticos()
+        private void btnNavCpuMemoria_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                labelOrdenadorFabricante.Content = lector.getOrdenadorFabricante();
-                labelOrdenadorModelo.Content = lector.getOrdenadorModelo();
-
-                string[] procesadores = lector.getProcesadores();
-                labelOrdenadorProcesador.Content = (procesadores != null && procesadores.Length > 0)
-                    ? procesadores[0]
-                    : "-";
-
-                labelUsuario.Content = lector.getUsuario();
-            }
-            catch
-            {
-                // Fallback
-            }
+            NavegarAPagina(_pageCpuMemoria);
         }
 
-        private void ActualizarDatos()
+        private void btnNavDiscoRed_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                labelCPU.Content = lector.getCPU();
-                labelMemoriaFisica.Content = lector.getMemoriaFisica();
-                labelMemoriaVirtual.Content = lector.getMemoriaVirtual();
-                labelDiscosLogicos.Content = lector.getDiscosLogicos();
+            NavegarAPagina(_pageDiscoRed);
+        }
 
-                labelDiscoLectura.Content = FormatearBytesPorSegundo(lector.getDatosDisco(DiskData.Read));
-                labelDiscoEscritura.Content = FormatearBytesPorSegundo(lector.getDatosDisco(DiskData.Write));
-                labelDiscoLecturaEscritura.Content = FormatearBytesPorSegundo(lector.getDatosDisco(DiskData.ReadAndWrite));
+        private void btnNavSistema_Click(object sender, RoutedEventArgs e)
+        {
+            NavegarAPagina(_pageSistema);
+        }
 
-                labelRedRecibidos.Content = FormatearBytesPorSegundo(lector.getDatosRed(NetData.Received));
-                labelRedEnviados.Content = FormatearBytesPorSegundo(lector.getDatosRed(NetData.Sent));
-                labelRedRecibidosEnviados.Content = FormatearBytesPorSegundo(lector.getDatosRed(NetData.ReceivedAndSent));
-            }
-            catch
+        private void btnNavAcercaDe_Click(object sender, RoutedEventArgs e)
+        {
+            VentanaAcercaDe dlg = new VentanaAcercaDe();
+            dlg.Owner = this;
+            dlg.ShowDialog();
+        }
+
+        private void NavegarAPagina(object page)
+        {
+            mainFrame.Navigate(page);
+            if (page is IActualizable actualizable)
             {
-                // Fallback
+                actualizable.ActualizarDatos(_lector);
             }
         }
 
         private void btnActualizar_Click(object sender, RoutedEventArgs e)
         {
-            ActualizarDatos();
+            ActualizarPaginaActiva();
 
-            if (!dispatcherTimer.IsEnabled)
+            if (!_dispatcherTimer.IsEnabled)
             {
-                dispatcherTimer.Start();
+                _dispatcherTimer.Start();
                 btnActualizar.Content = "Parar";
             }
             else
             {
-                dispatcherTimer.Stop();
+                _dispatcherTimer.Stop();
                 btnActualizar.Content = "Actualizar";
             }
         }
 
         private void dispatcherTimer_Tick(object sender, EventArgs e)
         {
-            ActualizarDatos();
+            ActualizarPaginaActiva();
         }
 
-        private string FormatearBytesPorSegundo(double bytesPorSegundo)
+        private void ActualizarPaginaActiva()
         {
-            if (bytesPorSegundo >= 1024.0 * 1024.0 * 1024.0)
-                return string.Format("{0:0.00} GB/s", bytesPorSegundo / (1024.0 * 1024.0 * 1024.0));
-            if (bytesPorSegundo >= 1024.0 * 1024.0)
-                return string.Format("{0:0.00} MB/s", bytesPorSegundo / (1024.0 * 1024.0));
-            if (bytesPorSegundo >= 1024.0)
-                return string.Format("{0:0.00} KB/s", bytesPorSegundo / 1024.0);
-            return string.Format("{0:0.00} B/s", bytesPorSegundo);
+            if (mainFrame.Content is IActualizable actualizable)
+            {
+                actualizable.ActualizarDatos(_lector);
+            }
         }
     }
 }
